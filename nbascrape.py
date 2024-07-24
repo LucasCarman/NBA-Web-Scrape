@@ -4,6 +4,48 @@ import string
 import random
 import re
 
+def getPlayerImage(player_url):
+    player_page_url = f'https://www.basketball-reference.com/{player_url}'
+    page = urlopen(player_page_url)
+    html = page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    image_url = soup.find("div", class_="media-item").find("img")['src']
+    #image_src = re.compile("", image_url[0])
+    return(image_url)
+
+def getPpgLeadersDict():
+    player_list_dict = {}
+    pts_per_game_leader_page = urlopen("https://www.basketball-reference.com/leaders/pts_per_g_career.html")
+    html = pts_per_game_leader_page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+
+    ppg_career_table = soup.find(id="all_tot")#.find_previous("table")
+    player_links = ppg_career_table.find_all("a")
+
+    for link in player_links:
+
+        player_link = re.findall(f'players.+html', link['href'])[0]
+        #player_list_dict[link.text[link.text]].append(player_link)
+        player_list_dict[link.text] =  [link.parent.find_next("td").text, player_link]
+        #print(player_list_dict)
+    return(player_list_dict)
+
+
+def pickTwoPlayers(player_list_dict):
+    player_a = random.choice(list(player_list_dict.items()))
+    #print(player_a)
+    player_a[1][1] = getPlayerImage(player_a[1][1])
+    del player_list_dict[player_a[0]]
+    player_b = random.choice(list(player_list_dict.items()))
+    player_b[1][1] = getPlayerImage(player_b[1][1])
+    return(player_a, player_b)
+
+
+
+
+
+
+
 
 def getCareerStat(stat_name, url):
     player_url = f'https://www.basketball-reference.com/{url}'
